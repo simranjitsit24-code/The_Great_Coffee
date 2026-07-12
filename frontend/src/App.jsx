@@ -114,7 +114,7 @@ function App() {
           <button onClick={() => window.location.reload()}>
             🔄 Retry
           </button>
-          <button onClick={() => window.location.href = 'https://your-backend-url.onrender.com/health'}>
+          <button onClick={() => window.location.href = 'https://the-great-coffee.onrender.com/health'}>
             🏥 Check Backend
           </button>
         </div>
