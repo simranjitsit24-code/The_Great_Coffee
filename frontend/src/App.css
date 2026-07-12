@@ -136,6 +136,247 @@ body {
   text-decoration: none;
   font-weight: 500;
 }
+/* Add these styles to your existing App.css */
+
+/* Password Strength Styles */
+.password-strength-container {
+  margin: 8px 0 12px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.strength-bar {
+  width: 100%;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.strength-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.strength-score {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.strength-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+
+.feedback-item {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.strength-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  margin-top: 6px;
+}
+
+.req-item {
+  font-size: 0.8rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.req-item.met {
+  color: #2b8a3e;
+}
+
+/* Password Input Wrapper */
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-input-wrapper input {
+  padding-right: 3rem !important;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.toggle-password:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Password Match */
+.password-match {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.password-match.match {
+  color: #2b8a3e;
+}
+
+.password-match.mismatch {
+  color: #e74c3c;
+}
+
+/* Auth Container Styles */
+.auth-container {
+  max-width: 440px;
+  margin: 3rem auto;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.auth-container h2 {
+  margin: 0 0 0.25rem 0;
+  text-align: center;
+  color: #2d2d2d;
+  font-size: 1.8rem;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: #2d2d2d;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background: #f8f9fa;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6c4a3a;
+  box-shadow: 0 0 0 3px rgba(108, 74, 58, 0.1);
+  background: white;
+}
+
+.form-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-btn, .login-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: #6c4a3a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 0.5rem;
+}
+
+.register-btn:hover:not(:disabled),
+.login-btn:hover:not(:disabled) {
+  background: #5a3d30;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 74, 58, 0.3);
+}
+
+.register-btn:disabled,
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0.75rem;
+  background: #fef3f2;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+}
+
+.link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #6c757d;
+}
+
+.link a {
+  color: #6c4a3a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-container {
+    margin: 1.5rem 1rem;
+    padding: 1.5rem;
+  }
+  
+  .strength-requirements {
+    grid-template-columns: 1fr;
+  }
+}
 
 .auth-container .link a:hover {
   text-decoration: underline;
