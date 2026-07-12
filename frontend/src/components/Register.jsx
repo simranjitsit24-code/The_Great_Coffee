@@ -101,7 +101,7 @@ function Register({ setUser }) {
     setLoading(true);
 
     try {
-      console.log('Attempting registration...');
+      console.log('📝 Attempting registration...');
 
       // Register
       await axios.post('/api/register', {
@@ -110,7 +110,7 @@ function Register({ setUser }) {
         password
       });
 
-      console.log('Registration successful');
+      console.log('✅ Registration successful');
 
       // Auto login after registration
       const loginResponse = await axios.post('/api/login', {
@@ -118,16 +118,16 @@ function Register({ setUser }) {
         password
       });
 
-      console.log('Auto-login successful:', loginResponse.data);
+      console.log('✅ Auto-login successful:', loginResponse.data);
       setUser(loginResponse.data.user);
       navigate('/');
 
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('❌ Registration error:', error);
 
       if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
+        console.error('Status:', error.response.status);
+        console.error('Data:', error.response.data);
         setError(error.response.data?.error || 'Registration failed');
       } else if (error.request) {
         console.error('No response from server');
