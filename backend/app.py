@@ -23,13 +23,11 @@ app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
-# ============ FIX CORS ============
-# Get allowed origins from environment or use defaults
-allowed_origins = os.environ.get('CORS_ORIGINS', 'https://the-great-coffee-1.onrender.com,http://localhost:5173,http://localhost:5174').split(',')
-
+# ============ CORS CONFIGURATION ============
+# Allow ALL origins for testing (we'll restrict later)
 CORS(app, 
      supports_credentials=True, 
-     origins=allowed_origins,
+     origins=['*'],  # Allow all origins temporarily
      allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
      expose_headers=['Content-Type', 'Authorization'],
      methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'])
@@ -325,20 +323,11 @@ def get_vote_status(item_id):
         print(f"Vote status error: {str(e)}")
         return jsonify({'has_voted': False}), 200
 
+# ============ CORS HEADERS FOR ALL RESPONSES ============
 @app.after_request
 def after_request(response):
-    # Get the origin from the request
-    origin = request.headers.get('Origin')
-    
-    # List of allowed origins (same as CORS configuration)
-    allowed_origins = os.environ.get('CORS_ORIGINS', 'https://the-great-coffee-1.onrender.com,http://localhost:5173,http://localhost:5174').split(',')
-    
-    # If the origin is allowed, add the CORS headers
-    if origin in allowed_origins:
-        response.headers.add('Access-Control-Allow-Origin', origin)
-    elif '*' in allowed_origins:
-        response.headers.add('Access-Control-Allow-Origin', '*')
-    
+    # Allow all origins
+    response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept')
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
@@ -352,5 +341,4 @@ if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     print(f"🚀 Starting server on port {port}")
     print(f"🔗 Access at: http://0.0.0.0:{port}")
-    print(f"🐛 Debug mode: {debug}")
     app.run(debug=debug, host='0.0.0.0', port=port)
