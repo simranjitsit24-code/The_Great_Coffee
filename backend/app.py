@@ -4,19 +4,45 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import bcrypt
 import secrets
+import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = secrets.token_hex(16)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coffee_shop.db'
+
+# Production configuration
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(16))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///coffee_shop.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Fix CORS - allow all origins for development
+# Handle Heroku/Render PostgreSQL URL format
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+
+# CORS configuration for production
 CORS(app, 
      supports_credentials=True, 
-     origins=['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173'],
+     origins=os.environ.get('CORS_ORIGINS', 'https://your-frontend-url.onrender.com').split(','),
      allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'],
      expose_headers=['Content-Type', 'Authorization'])
 
+db = SQLAlchemy(app)
+
+# ... (rest of your models and routes remain the same)
+
+if __name__ == '__main__':
+    # IMPORTANT: Use the PORT environment variable that Render provides
+    port = int(os.environ.get('PORT', 5000))
+    # Bind to 0.0.0.0 to accept connections from outside
+    app.run(debug=False, host='0.0.0.0', port=port)
+
+db = SQLAlchemy(app)
+
+# ... (rest of your models and routes remain the same)
+
+if __name__ == '__main__':
+    # IMPORTANT: Use the PORT environment variable that Render provides
+    port = int(os.environ.get('PORT', 5000))
+    # Bind to 0.0.0.0 to accept connections from outside
+    app.run(debug=False, host='0.0.0.0', port=port)
 db = SQLAlchemy(app)
 
 # Models
