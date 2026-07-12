@@ -6,7 +6,6 @@ import bcrypt
 import secrets
 import os
 
-# Initialize Flask app
 app = Flask(__name__)
 
 # Configuration
@@ -19,25 +18,25 @@ if database_url.startswith('postgres://'):
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Session configuration for production
-app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+# Session configuration
+app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'None' if os.environ.get('FLASK_ENV') == 'production' else 'Lax'
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
-# CORS configuration
-cors_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:5173,https://coffee-shop-frontend.onrender.com').split(',')
+# ============ FIX CORS ============
+# Get allowed origins from environment or use defaults
+allowed_origins = os.environ.get('CORS_ORIGINS', 'https://the-great-coffee-1.onrender.com,http://localhost:5173,http://localhost:5174').split(',')
+
 CORS(app, 
      supports_credentials=True, 
-     origins=cors_origins,
+     origins=allowed_origins,
      allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
      expose_headers=['Content-Type', 'Authorization'],
      methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'])
 
-# Initialize database
 db = SQLAlchemy(app)
 
-# ============ MODELS ============
-
+# Models
 class User(db.Model):
     __tablename__ = 'users'
     
@@ -71,8 +70,7 @@ class Vote(db.Model):
     
     __table_args__ = (db.UniqueConstraint('user_id', 'item_id', name='unique_user_item_vote'),)
 
-# ============ DATABASE INITIALIZATION ============
-
+# Create tables and seed data
 with app.app_context():
     db.create_all()
     
@@ -115,16 +113,13 @@ with app.app_context():
         db.session.commit()
         print("✅ Sample menu items added!")
 
-# ============ HELPER FUNCTIONS ============
-
 def get_current_user():
     user_id = session.get('user_id')
     if user_id:
         return User.query.get(user_id)
     return None
 
-# ============ ROUTES ============
-
+# Routes
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({
@@ -330,19 +325,15 @@ def get_vote_status(item_id):
         print(f"Vote status error: {str(e)}")
         return jsonify({'has_voted': False}), 200
 
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({'error': 'Endpoint not found'}), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({'error': 'Internal server error'}), 500
-
 @app.after_request
 def after_request(response):
+    # Get the origin from the request
     origin = request.headers.get('Origin')
-    allowed_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:5173').split(',')
     
+    # List of allowed origins (same as CORS configuration)
+    allowed_origins = os.environ.get('CORS_ORIGINS', 'https://the-great-coffee-1.onrender.com,http://localhost:5173,http://localhost:5174').split(',')
+    
+    # If the origin is allowed, add the CORS headers
     if origin in allowed_origins:
         response.headers.add('Access-Control-Allow-Origin', origin)
     elif '*' in allowed_origins:
@@ -353,10 +344,9 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
-# ============ FOR GUNICORN ============
+# For Gunicorn
 application = app
 
-# ============ MAIN ============
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
