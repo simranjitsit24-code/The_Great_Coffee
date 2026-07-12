@@ -24,10 +24,18 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
 # ============ CORS CONFIGURATION ============
-# Allow ALL origins for testing (we'll restrict later)
+# Get allowed origins from environment or use default
+# IMPORTANT: Must be specific origins, not '*' when using credentials
+allowed_origins = [
+    'https://the-great-coffee-1.onrender.com',  # Your frontend URL
+    'https://the-great-coffee.onrender.com',     # Your backend URL
+    'http://localhost:5173',                      # Local development
+    'http://localhost:5174'                       # Local development
+]
+
 CORS(app, 
      supports_credentials=True, 
-     origins=['*'],  # Allow all origins temporarily
+     origins=allowed_origins,
      allow_headers=['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
      expose_headers=['Content-Type', 'Authorization'],
      methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'])
@@ -326,8 +334,24 @@ def get_vote_status(item_id):
 # ============ CORS HEADERS FOR ALL RESPONSES ============
 @app.after_request
 def after_request(response):
-    # Allow all origins
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    # Get the origin from the request
+    origin = request.headers.get('Origin')
+    
+    # Allowed origins (must match the CORS configuration above)
+    allowed_origins = [
+        'https://the-great-coffee-1.onrender.com',
+        'https://the-great-coffee.onrender.com',
+        'http://localhost:5173',
+        'http://localhost:5174'
+    ]
+    
+    # If the origin is allowed, set the specific origin
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    elif origin and origin.endswith('.onrender.com'):
+        # Allow all render.com subdomains (for flexibility)
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept')
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
