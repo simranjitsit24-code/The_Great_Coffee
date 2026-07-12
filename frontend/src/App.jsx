@@ -6,16 +6,40 @@ import Menu from './components/Menu.jsx';
 import axios from 'axios';
 import './App.css';
 
-// Get API URL from environment variables
+// Get API URL from environment variables (set on Render)
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Log for debugging
+console.log('🔗 API URL:', API_URL);
+console.log('🔧 Environment:', import.meta.env.MODE);
 
 // Configure axios
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-// Log the API URL for debugging
-console.log('🔗 API URL:', API_URL);
+// Add request interceptor for debugging
+axios.interceptors.request.use(
+  (config) => {
+    console.log(`📤 ${config.method.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+axios.interceptors.response.use(
+  (response) => {
+    console.log(`📥 ${response.status} ${response.config.url}`);
+    return response;
+  },
+  (error) => {
+    console.error(`❌ ${error.config?.url}:`, error.message);
+    return Promise.reject(error);
+  }
+);
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,19 +48,24 @@ function App() {
 
   const checkAuth = useCallback(async () => {
     try {
-      console.log('Checking authentication...');
+      console.log('🔍 Checking authentication...');
       const response = await axios.get('/api/current_user');
-      console.log('Auth response:', response.data);
+      console.log('✅ Auth successful:', response.data);
       setUser(response.data);
       setError(null);
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error('❌ Auth check error:', error);
       if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
+        console.error('Status:', error.response.status);
+        console.error('Data:', error.response.data);
+        setError(`Server error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
+      } else if (error.request) {
+        console.error('No response received');
+        setError('Cannot connect to server. Please check if backend is running.');
+      } else {
+        setError(error.message);
       }
       setUser(null);
-      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -60,7 +89,9 @@ function App() {
       <div className="loading">
         <div className="loading-spinner">⏳</div>
         <p>Loading...</p>
-        <p style={{ fontSize: '0.8rem', color: '#666' }}>Connecting to {API_URL}</p>
+        <p style={{ fontSize: '0.8rem', color: '#666' }}>
+          Connecting to: {API_URL}
+        </p>
       </div>
     );
   }
@@ -71,12 +102,25 @@ function App() {
         <h2>⚠️ Connection Error</h2>
         <p>Could not connect to the server at:</p>
         <code>{API_URL}</code>
-        <p style={{ marginTop: '1rem' }}>
-          Make sure the backend is running and the URL is correct.
+        <div style={{ marginTop: '1rem', padding: '1rem', background: '#f8f9fa', borderRadius: '8px', textAlign: 'left' }}>
+          <p><strong>Debug Info:</strong></p>
+          <p style={{ fontSize: '0.9rem', color: '#666' }}>
+            • Environment: {import.meta.env.MODE}<br />
+            • API URL: {API_URL}<br />
+            • Error: {error}
+          </p>
+        </div>
+        <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button onClick={() => window.location.reload()}>
+            🔄 Retry
+          </button>
+          <button onClick={() => window.location.href = 'https://your-backend-url.onrender.com/health'}>
+            🏥 Check Backend
+          </button>
+        </div>
+        <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
+          Make sure your backend URL is correct in Render environment variables.
         </p>
-        <button onClick={() => window.location.reload()}>
-          Retry
-        </button>
       </div>
     );
   }
